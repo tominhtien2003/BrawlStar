@@ -1,0 +1,31 @@
+using Fusion;
+using UnityEngine;
+
+public class StateMachine : NetworkBehaviour
+{
+    private BaseState currentState;
+    public void ChangeState(BaseState state)
+    {
+        if (currentState != null && state.TypeState() == currentState.TypeState())
+        {
+            return;
+        }
+        if (currentState != null)
+        {
+            currentState.Exit();
+        }
+        currentState = state;
+
+        if (currentState != null)
+        {
+            currentState.Enter();
+        }
+    }
+    public override void FixedUpdateNetwork()
+    {
+        if (currentState != null)
+        {
+            currentState.Excute();
+        }
+    }
+}
