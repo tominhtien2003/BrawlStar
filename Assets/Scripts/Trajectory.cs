@@ -1,4 +1,5 @@
 ﻿using Fusion;
+using System;
 using UnityEngine;
 
 public class Trajectory : NetworkBehaviour
@@ -11,8 +12,11 @@ public class Trajectory : NetworkBehaviour
 
     private LineRenderer lineRenderer;
     private Vector3[] trajectoryRocket;
-    [SerializeField] NetworkObject rocketPrefab;
+    private Vector3[] points;
+    [SerializeField] private NetworkObject rocketPrefab;
     private SwipeArea swipeHandler;
+
+    private Rocket rocket;
 
     private void Awake()
     {
@@ -22,32 +26,36 @@ public class Trajectory : NetworkBehaviour
         {
             swipeHandler.OnSwipe += HandleSwipe;
         }
+        trajectoryRocket = new Vector3[numberOfPoints];
+        points = new Vector3[numberOfPoints];
     }
 
     public override void FixedUpdateNetwork()
     {
         if (GetInput(out NetworkInputData data))
         {
-            if (data.buttons.IsSet(NetworkInputData.BUTTONEDITFORCESHOOT))
-            {
-                DrawTrajectory();
-            }
-            else
-            {
-                lineRenderer.positionCount = 0;
-            }
+            bool isEditingForceShoot = data.buttons.IsSet(NetworkInputData.BUTTONEDITFORCESHOOT);
 
-            if (data.buttons.IsSet(NetworkInputData.BUTTONSHOOT))
+            SetLineRendererAlpha(isEditingForceShoot ? 1f : 0f);
+
+            DrawTrajectory();
+
+            if (data.buttons.IsSet(NetworkInputData.BUTTONSHOOT) && rocket == null)
             {
+                Debug.Log("aa");
                 if (Runner.IsServer && rocketPrefab != null)
                 {
                     NetworkObject networkObject = Runner.Spawn(rocketPrefab, pointShoot.position, Quaternion.identity);
                     if (networkObject != null)
                     {
-                        Rocket rocket = networkObject.gameObject.GetComponent<Rocket>();
+                        rocket = networkObject.GetComponent<Rocket>();
                         if (rocket != null)
                         {
-                            rocket.SetTrajectoryRocket(trajectoryRocket);
+                            // Sao chép mảng trajectoryRocket trước khi truyền cho rocket
+                            Vector3[] copiedTrajectory = new Vector3[trajectoryRocket.Length];
+                            Array.Copy(trajectoryRocket, copiedTrajectory, trajectoryRocket.Length);
+                            rocket.SetTrajectoryRocket(copiedTrajectory);
+                            rocket.transform.SetParent(null);
                         }
                     }
                 }
@@ -55,34 +63,43 @@ public class Trajectory : NetworkBehaviour
         }
     }
 
-    private void HandleSwipe(Vector3 mouseDirection)
+    private void SetLineRendererAlpha(float alpha)
     {
-        if (mouseDirection.y > 0)
+        if (Mathf.Approximately(lineRenderer.startColor.a, alpha) && Mathf.Approximately(lineRenderer.endColor.a, alpha))
         {
-            velocity += 0.1f;
-        }
-        else if (mouseDirection.y < 0)
-        {
-            velocity -= 0.1f;
+            return;
         }
 
+        Color startColor = lineRenderer.startColor;
+        startColor.a = alpha;
+        lineRenderer.startColor = startColor;
+
+        Color endColor = lineRenderer.endColor;
+        endColor.a = alpha;
+        lineRenderer.endColor = endColor;
+    }
+
+    private void HandleSwipe(Vector3 mouseDirection)
+    {
+        velocity += mouseDirection.y > 0 ? 0.1f : -0.1f;
         velocity = Mathf.Clamp(velocity, 5f, 12f);
     }
 
     private void DrawTrajectory()
     {
         lineRenderer.positionCount = numberOfPoints;
-        Vector3[] points = new Vector3[numberOfPoints];
 
         Vector3 startPos = pointShoot.position;
         float radianAngle = angle * Mathf.Deg2Rad;
-        float t_total = 2 * velocity * Mathf.Sin(radianAngle) / -gravity;
+        float cos = Mathf.Cos(radianAngle);
+        float sin = Mathf.Sin(radianAngle);
+        float t_total = 2 * velocity * sin / -gravity;
 
         for (int i = 0; i < numberOfPoints; i++)
         {
             float t = i * t_total / (numberOfPoints - 1);
-            float x = velocity * Mathf.Cos(radianAngle) * t;
-            float y = velocity * Mathf.Sin(radianAngle) * t + 0.5f * gravity * t * t;
+            float x = velocity * cos * t;
+            float y = velocity * sin * t + 0.5f * gravity * t * t;
 
             points[i] = startPos + transform.forward * x + Vector3.up * y;
         }

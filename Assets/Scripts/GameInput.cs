@@ -5,8 +5,8 @@ using UnityEngine.UI;
 public class GameInput : MonoBehaviour
 {
     private InputActions inputActions;
-    [Networked] public bool isPressShootButton { get; set; }
-    [Networked] private bool isEditForceButton { get; set; }
+    public bool isPressShootButton;
+    private bool isEditForceButton;
     private void Start()
     {
         inputActions = new InputActions();

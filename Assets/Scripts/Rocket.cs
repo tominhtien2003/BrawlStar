@@ -4,10 +4,11 @@ using UnityEngine;
 
 public class Rocket : NetworkBehaviour
 {
-    [SerializeField] NetworkObject explosionVFX;
+    [SerializeField] private NetworkObject explosionVFX;
     private Vector3[] trajectoryRocket;
-    public float speed = 10f; 
-    private float vfxLifetime = .8f; 
+    public float speed = 10f;
+    private float vfxLifetime = 0.8f;
+
     public void SetTrajectoryRocket(Vector3[] trajectoryRocket)
     {
         this.trajectoryRocket = trajectoryRocket;
@@ -16,9 +17,8 @@ public class Rocket : NetworkBehaviour
 
     private void Shooting()
     {
-        if (trajectoryRocket != null)
+        if (trajectoryRocket != null && trajectoryRocket.Length > 1)
         {
-            Debug.Log(trajectoryRocket.Length);
             StartCoroutine(MoveAlongTrajectory());
         }
     }
@@ -30,7 +30,6 @@ public class Rocket : NetworkBehaviour
             Vector3 start = trajectoryRocket[i];
             Vector3 end = trajectoryRocket[i + 1];
             Vector3 direction = (end - start).normalized;
-
             float distance = Vector3.Distance(start, end);
             float travelTime = distance / speed;
             float elapsedTime = 0f;
@@ -38,20 +37,21 @@ public class Rocket : NetworkBehaviour
             while (elapsedTime < travelTime)
             {
                 transform.position = Vector3.Lerp(start, end, elapsedTime / travelTime);
-                transform.forward = direction; 
+                transform.forward = direction;
                 elapsedTime += Runner.DeltaTime;
                 yield return null;
             }
+
             transform.position = end;
-            transform.forward = direction; 
+            transform.forward = direction;
         }
 
         if (Runner.IsServer)
         {
             NetworkObject vfxInstance = Runner.Spawn(explosionVFX, transform.position, Quaternion.identity);
-
             StartCoroutine(DestroyVFXAfterDelay(vfxInstance));
         }
+
         transform.GetChild(0).gameObject.SetActive(false);
     }
 
