@@ -1428,7 +1428,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 34.09029, y: 0.00000071525574, z: 2.5137672}
   m_LocalScale: {x: 0.6, y: 0.6, z: 0.6}
-  m_ConstrainProportionsScale: 1
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 847984784392948168}
   - {fileID: 3785108333042714092}
@@ -1627,7 +1627,7 @@ LineRenderer:
       m_Curve:
       - serializedVersion: 3
         time: 0
-        value: 0.31851387
+        value: 0.16257668
         inSlope: 0
         outSlope: 0
         tangentMode: 0
@@ -1636,7 +1636,7 @@ LineRenderer:
         outWeight: 0.33333334
       - serializedVersion: 3
         time: 0.9999992
-        value: 0.088890076
+        value: 0
         inSlope: 0
         outSlope: 0
         tangentMode: 0
@@ -1650,7 +1650,7 @@ LineRenderer:
       serializedVersion: 2
       key0: {r: 1, g: 1, b: 1, a: 1}
       key1: {r: 1, g: 1, b: 1, a: 1}
-      key2: {r: 0, g: 0, b: 0, a: 0}
+      key2: {r: 0, g: 0, b: 0, a: 0.5803922}
       key3: {r: 0, g: 0, b: 0, a: 0}
       key4: {r: 0, g: 0, b: 0, a: 0}
       key5: {r: 0, g: 0, b: 0, a: 0}
@@ -1665,17 +1665,17 @@ LineRenderer:
       ctime6: 0
       ctime7: 0
       atime0: 0
-      atime1: 65535
-      atime2: 0
+      atime1: 53585
+      atime2: 64995
       atime3: 0
       atime4: 0
       atime5: 0
       atime6: 0
       atime7: 0
       m_Mode: 0
-      m_ColorSpace: -1
+      m_ColorSpace: 0
       m_NumColorKeys: 2
-      m_NumAlphaKeys: 2
+      m_NumAlphaKeys: 3
     numCornerVertices: 0
     numCapVertices: 2
     alignment: 0
@@ -1699,11 +1699,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3bc5ef24abbbfd74eadc20e5cb2af08e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  velocity: 10
+  velocity: 9
   angle: 60
   gravity: -9.81
-  numberOfPoints: 50
+  numberOfPoints: 30
   pointShoot: {fileID: 7005331044770776266}
+  rocketPrefab: {fileID: 7411445237260081283, guid: 3f0701f3930801c499a08e8b99f729e0,
+    type: 3}
 --- !u!1 &5357495194511870886
 GameObject:
   m_ObjectHideFlags: 0

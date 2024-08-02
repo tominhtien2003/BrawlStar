@@ -1,5 +1,7 @@
 using Fusion;
+using System;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class PlayerController : NetworkBehaviour
 {
@@ -42,8 +44,6 @@ public class PlayerController : NetworkBehaviour
     public void HandlePlayerMove()
     {
         characterController.Move(directionPlayer);
-
-        //transform.forward = Vector3.Slerp(transform.forward, directionPlayer, Runner.DeltaTime * 6f);
 
         animator.SetBool("Move", true);
     }

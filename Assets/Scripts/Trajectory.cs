@@ -1,15 +1,18 @@
-using Fusion;
+﻿using Fusion;
 using UnityEngine;
 
 public class Trajectory : NetworkBehaviour
 {
-    public float velocity = 10f; // Vận tốc bắn
-    public float angle = 45f; // Góc bắn
-    public float gravity = -9.81f; // Trọng lực
-    public int numberOfPoints = 30; // Số điểm trên đường đi
-    public Transform pointShoot; // Điểm bắt đầu đường đi
+    public float velocity;
+    public float angle;
+    public float gravity;
+    public int numberOfPoints;
+    public Transform pointShoot;
 
     private LineRenderer lineRenderer;
+    private Vector3[] trajectoryRocket;
+    [SerializeField] NetworkObject rocketPrefab;
+    [Networked] bool waitShoot  {get;set;}
 
     private void Awake()
     {
@@ -18,7 +21,34 @@ public class Trajectory : NetworkBehaviour
 
     public override void FixedUpdateNetwork()
     {
-        DrawTrajectory();
+        if (GetInput(out NetworkInputData data))
+        {
+            if (data.buttons.IsSet(NetworkInputData.BUTTONSHOOT))
+            {
+                waitShoot = true;
+                DrawTrajectory();
+            }
+            else
+            {
+                if (waitShoot)
+                {
+                    waitShoot = false;
+                    lineRenderer.positionCount = 0;
+                    if (Runner.IsServer && rocketPrefab != null)
+                    {
+                        NetworkObject networkObject = Runner.Spawn(rocketPrefab, pointShoot.position, Quaternion.identity);
+                        if (networkObject != null)
+                        {
+                            Rocket rocket = networkObject.gameObject.GetComponent<Rocket>();
+                            if (rocket != null)
+                            {
+                                rocket.SetTrajectoryRocket(trajectoryRocket);
+                            }
+                        }
+                    }
+                }
+            }
+        }    
     }
 
     private void DrawTrajectory()
@@ -36,8 +66,14 @@ public class Trajectory : NetworkBehaviour
             float x = velocity * Mathf.Cos(radianAngle) * t;
             float y = velocity * Mathf.Sin(radianAngle) * t + 0.5f * gravity * t * t;
 
-            points[i] = startPos + new Vector3(x * transform.forward.x, y, 0);
+            points[i] = startPos + transform.forward * x + Vector3.up * y;
         }
+        trajectoryRocket = points;
+
         lineRenderer.SetPositions(points);
+    }
+    public Vector3[] GetTrajectory()
+    {
+        return trajectoryRocket;
     }
 }

@@ -80,6 +80,8 @@ public class BasicSpawner : SimulationBehaviour, INetworkRunnerCallbacks
 
         data.direction = direction;
 
+        data.buttons.Set(NetworkInputData.BUTTONSHOOT, gameInput.IsPressShootButton());
+
         input.Set(data);
     }
 
