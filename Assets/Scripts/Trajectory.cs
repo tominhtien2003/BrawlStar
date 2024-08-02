@@ -12,43 +12,61 @@ public class Trajectory : NetworkBehaviour
     private LineRenderer lineRenderer;
     private Vector3[] trajectoryRocket;
     [SerializeField] NetworkObject rocketPrefab;
-    [Networked] bool waitShoot  {get;set;}
+    private SwipeArea swipeHandler;
 
     private void Awake()
     {
         lineRenderer = GetComponent<LineRenderer>();
+        swipeHandler = FindObjectOfType<SwipeArea>();
+        if (swipeHandler != null)
+        {
+            swipeHandler.OnSwipe += HandleSwipe;
+        }
     }
 
     public override void FixedUpdateNetwork()
     {
         if (GetInput(out NetworkInputData data))
         {
-            if (data.buttons.IsSet(NetworkInputData.BUTTONSHOOT))
+            if (data.buttons.IsSet(NetworkInputData.BUTTONEDITFORCESHOOT))
             {
-                waitShoot = true;
                 DrawTrajectory();
             }
             else
             {
-                if (waitShoot)
+                lineRenderer.positionCount = 0;
+            }
+
+            if (data.buttons.IsSet(NetworkInputData.BUTTONSHOOT))
+            {
+                if (Runner.IsServer && rocketPrefab != null)
                 {
-                    waitShoot = false;
-                    lineRenderer.positionCount = 0;
-                    if (Runner.IsServer && rocketPrefab != null)
+                    NetworkObject networkObject = Runner.Spawn(rocketPrefab, pointShoot.position, Quaternion.identity);
+                    if (networkObject != null)
                     {
-                        NetworkObject networkObject = Runner.Spawn(rocketPrefab, pointShoot.position, Quaternion.identity);
-                        if (networkObject != null)
+                        Rocket rocket = networkObject.gameObject.GetComponent<Rocket>();
+                        if (rocket != null)
                         {
-                            Rocket rocket = networkObject.gameObject.GetComponent<Rocket>();
-                            if (rocket != null)
-                            {
-                                rocket.SetTrajectoryRocket(trajectoryRocket);
-                            }
+                            rocket.SetTrajectoryRocket(trajectoryRocket);
                         }
                     }
                 }
             }
-        }    
+        }
+    }
+
+    private void HandleSwipe(Vector3 mouseDirection)
+    {
+        if (mouseDirection.y > 0)
+        {
+            velocity += 0.1f;
+        }
+        else if (mouseDirection.y < 0)
+        {
+            velocity -= 0.1f;
+        }
+
+        velocity = Mathf.Clamp(velocity, 5f, 12f);
     }
 
     private void DrawTrajectory()
@@ -72,6 +90,7 @@ public class Trajectory : NetworkBehaviour
 
         lineRenderer.SetPositions(points);
     }
+
     public Vector3[] GetTrajectory()
     {
         return trajectoryRocket;

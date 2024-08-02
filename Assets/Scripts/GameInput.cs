@@ -1,28 +1,35 @@
 using Fusion;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class GameInput : MonoBehaviour
 {
     private InputActions inputActions;
-    private PointerDetector pointerDetector;
-    [Networked] private bool isPressShootButton { get; set; }
+    [Networked] public bool isPressShootButton { get; set; }
+    [Networked] private bool isEditForceButton { get; set; }
     private void Start()
     {
         inputActions = new InputActions();
 
         inputActions.Player.Enable();
 
-        PointerDetector pointerDetector = GameObject.Find("ButtonShoot").GetComponent<PointerDetector>();
-
-        pointerDetector.OnButtonShootPress += PointerDetector_OnButtonShootPress;
+        isPressShootButton = false;
     }
-    private void PointerDetector_OnButtonShootPress(object sender, PointerDetector.OnButtonShootPressEventArgs e)
+    public void ShootButton()
     {
-        isPressShootButton = e.isPress;
+        isPressShootButton = true;
+    }
+    public void EditButton()
+    {
+        isEditForceButton = !isEditForceButton;
     }
     public bool IsPressShootButton()
     {
         return isPressShootButton;
+    }
+    public bool IsEditForceButton()
+    {
+        return isEditForceButton;
     }
     public Vector2 GetMoveDirectionPlayer()
     {
