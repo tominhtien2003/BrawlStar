@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 3988976959882386664}
   - component: {fileID: 8172811652650010160}
   - component: {fileID: 7411445237260081283}
-  - component: {fileID: 5991312537163671120}
+  - component: {fileID: 7156148583348473570}
   m_Layer: 0
   m_Name: Rocket
   m_TagString: Untagged
@@ -68,8 +68,8 @@ MonoBehaviour:
   NestedObjects: []
   NetworkedBehaviours:
   - {fileID: 8172811652650010160}
-  - {fileID: 5991312537163671120}
---- !u!114 &5991312537163671120
+  - {fileID: 7156148583348473570}
+--- !u!114 &7156148583348473570
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

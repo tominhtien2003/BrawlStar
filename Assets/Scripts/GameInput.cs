@@ -1,12 +1,11 @@
 using Fusion;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class GameInput : MonoBehaviour
 {
     private InputActions inputActions;
-    public bool isPressShootButton;
-    private bool isEditForceButton;
+    [Networked] public bool isPressShootButton { get; set; }
+
     private void Start()
     {
         inputActions = new InputActions();
@@ -17,19 +16,11 @@ public class GameInput : MonoBehaviour
     }
     public void ShootButton()
     {
-        isPressShootButton = true;
-    }
-    public void EditButton()
-    {
-        isEditForceButton = !isEditForceButton;
+        isPressShootButton = !isPressShootButton;
     }
     public bool IsPressShootButton()
     {
         return isPressShootButton;
-    }
-    public bool IsEditForceButton()
-    {
-        return isEditForceButton;
     }
     public Vector2 GetMoveDirectionPlayer()
     {

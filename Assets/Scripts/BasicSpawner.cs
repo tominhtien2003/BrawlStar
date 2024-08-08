@@ -11,8 +11,10 @@ public class BasicSpawner : SimulationBehaviour, INetworkRunnerCallbacks
     [SerializeField] NetworkPrefabRef playerPrefab;
     [SerializeField] Transform[] pointSpawns;
     private static int indexPointSpawn = -1;
-    private GameInput gameInput;
+    private InputActions inputActions;
     private Dictionary<PlayerRef, NetworkObject> spawnCharacter = new Dictionary<PlayerRef, NetworkObject>();
+
+    private bool isPressShootButton;
 
     async void StartGame(GameMode mode)
     {
@@ -39,7 +41,13 @@ public class BasicSpawner : SimulationBehaviour, INetworkRunnerCallbacks
     }
     private void Awake()
     {
-        gameInput = FindObjectOfType<GameInput>();
+        inputActions = new InputActions();
+
+        inputActions.Player.Enable();
+    }
+    public void ShootButton()
+    {
+        isPressShootButton = true;
     }
     public void OnConnectedToServer(NetworkRunner runner)
     {
@@ -72,17 +80,16 @@ public class BasicSpawner : SimulationBehaviour, INetworkRunnerCallbacks
     }
 
     public void OnInput(NetworkRunner runner, NetworkInput input)
-    {
+    {   
         var data = new NetworkInputData();
 
-        Vector2 moveDirection = gameInput.GetMoveDirectionPlayer();
-        Vector3 direction = new Vector3(moveDirection.x, 0f, moveDirection.y);
+        Vector2 moveDirection = inputActions.Player.Move.ReadValue<Vector2>();
 
-        data.direction = direction;
+        data.direction = moveDirection;
 
-        data.buttons.Set(NetworkInputData.BUTTONEDITFORCESHOOT, gameInput.IsEditForceButton());
-        data.buttons.Set(NetworkInputData.BUTTONSHOOT, gameInput.IsPressShootButton());
-        gameInput.isPressShootButton = false;
+        data.buttons.Set(NetworkInputData.BUTTONSHOOT, isPressShootButton);
+
+        isPressShootButton = false;
 
         input.Set(data);
     }
